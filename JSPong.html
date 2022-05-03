@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+<title>MGF-Pong</title>
+<link rel="icon" href="images/mgf-favicon.png">
+<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+<style>
+html,body,h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
+.w3-sidenav a,.w3-sidenav h4 {padding: 12px;}
+.w3-navbar li a {
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+</style>
+</head>
+
+<body class="w3-white">
+
+<?php
+//Kopf mit Menue einbinden
+include 'head.php';
+?>
+
+<div class="w3-center w3-white" style="width: 95%;  margin: 0 auto;">
+<h1>Pong</h1>
+<canvas class="w3-center" id="myCanvas" width="1280" height="720" style="heigth:100%"></canvas>
+
+<div class="w3-modal" id="setup">
+<div class="w3-card-8 w3-modal-content w3-white">
+<div class="w3-container w3-cyan">
+<h3 class="w3-cyan w3-white-text">Einstellungen:</h3>
+</div>
+<div class="w3-container w3-white">
+<div class="w3-container w3-half w3-white">
+<h4>Linker Spieler</h4><p>Tasten:<br /> W und S</p>
+<label>von Computer gesteuert </label><input id="kil" class="w3-check" type="checkbox" checked="checked" /><br /><br /> 
+<label>Name:</label><input id="namel" value="Spieler 1" class="w3-input w3-border w3-padding-4" type="text"><br />
+</div>
+<div class="w3-container w3-half w3-white">
+<h4>Rechter Spieler </h4><p>Tasten:<br />Pfeiltasten nach oben und unten</p>
+<label>von Computer gesteuert </label><input id="kir" class="w3-check" type="checkbox"><br /><br />
+<label>Name:</label><input id="namer" value="Spieler 2" class="w3-input w3-border w3-padding-4" type="text" /><br />
+</div>
+</div>
+<button onClick="start()" class="w3-btn-block w3-cyan">Spiel starten!</button>
+</div>
+</div>
+
+<div class="w3-modal" id="punktlinks">
+<div class="w3-card-8 w3-modal-content">
+<h3 id="pflt" class="w3-center">Punkt fuer</h3>
+<button onClick="weiter()" class="w3-btn-block w3-cyan">Weiter</button>
+</div>
+</div>
+
+<div class="w3-modal" id="gewonnenlinks">
+<div class="w3-card-8 w3-modal-content">
+<h3 id="grl" class="w3-center">hat das Spiel gewonnen</h3>
+<button onClick="neu()" class="w3-btn-block w3-cyan">Neues Spiel</button>
+<button href="games.php" class="w3-btn-block w3-cyan">Zurück</button>
+</div>
+</div>
+
+<div class="w3-modal" id="punktrechts">
+<div class="w3-card-8 w3-modal-content">
+<h3 id="pfrt" class="w3-center">Punkt fuer</h3>
+<button onClick="weiter()" class="w3-btn-block w3-cyan">Weiter</button>
+</div>
+</div>
+
+<div class="w3-modal" id="gewonnenrechts">
+<div class="w3-card-8 w3-modal-content">
+<h3 id="grt" class="w3-center">hat das Spiel gewonnen!</h3>
+<button onClick="neu()" class="w3-btn-block w3-cyan">Neues Spiel</button>
+<button class="w3-btn-block w3-cyan">Zurück</button>
+</div>
+</div>
+
+<div style="display: none;">
+<img src="images/background.jpg" id="background"  />
+<img src="images/ball.png" id="ballimg"  />
+<img src="images/leftpaddle.png" id="leftpaddle" />
+</div>
+
+
+<script>
+var leftrand=0;
+var rightrand=0;
+var pl=0;
+var pr=0;
+var on=false;
+var leftpos = 310;
+var rightpos =310;
+var speed = 500;
+var angle = 0;
+var balldx=5;
+var balldy=0;
+var ballx=615;
+var bally=335;
+var up=false;
+var down=false;
+var leftup=false;
+var leftdown=false;
+var rightplayer=false;
+var leftplayer=true; 
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+render();
+setInterval(loop, 33);
+document.getElementById('setup').style.display='block'
+
+function start()
+{
+	pl=0;
+	pr=0;
+	on=true;
+	leftpos=310;
+	rightpos=310;
+	speed=500;
+	angle=0;
+	ballx=615;
+	bally=335;
+	balldx=5;
+	balldy=0;
+	rightplayer = document.getElementById("kir").checked;
+	leftplayer = document.getElementById("kil").checked;
+	document.getElementById('setup').style.display='none';
+	document.getElementById('grt').innerHTML=document.getElementById("namer").value+" hat das Spiel gewonnen!";
+	document.getElementById('grl').innerHTML=document.getElementById("namel").value+" hat das Spiel gewonnen!";
+	document.getElementById('pflt').innerHTML="Punkt für "+document.getElementById("namel").value;
+	document.getElementById('pfrt').innerHTML="Punkt für "+document.getElementById("namer").value;
+	
+}
+
+function neu()
+{
+document.getElementById('setup').style.display='block';
+document.getElementById('gewonnenlinks').style.display='none';
+document.getElementById('gewonnenrechts').style.display='none';
+}
+
+function loop()
+{
+	if(on==true){
+	if(rightplayer==false)
+	{
+		if(up==true)
+		{rightpos-=5;}
+		else if(down==true)
+		{rightpos+=5;}
+	}
+	else
+	{
+		if(bally<(rightpos+25+rightrand))
+		{rightpos-=5}
+		if(bally>(rightpos+25+rightrand))
+		{rightpos+=5}
+	}
+	if(rightpos<20)
+	{
+		rightpos=20;
+	}
+	else if(rightpos>600)
+	{
+		rightpos=600;
+	}
+	
+	if(leftplayer==false)
+	{
+		if(leftup==true)
+		{leftpos-=5;}
+		else if(leftdown==true)
+		{leftpos+=5;}
+	}
+	else
+	{
+		if(bally<(leftpos+25+leftrand))
+		{leftpos-=5}
+		if(bally>(leftpos+25+leftrand))
+		{leftpos+=5}
+	}
+	if(leftpos<20)
+	{
+		leftpos=20;
+	}
+	else if(leftpos>600)
+	{
+		leftpos=600;
+	}
+	// Move ball
+	ballx+=balldx;
+	bally+=balldy;
+	
+	// Check collision with right paddle
+	if(checkcollission(1230,rightpos,20,100,ballx,bally,50,50)==true)
+	{
+		balldy=-(rightpos-bally+25)*0.13;
+		balldx=-Math.sqrt(Math.abs(speed^2-balldy^2));
+		leftrand=(Math.random() * (50 - (-50))) - 50;
+		rightrand=(Math.random() * (50 - (-50))) - 50;
+	}
+	// Check collision with left paddle
+	if(checkcollission(30,leftpos,20,100,ballx,bally,50,50)==true)
+	{
+		balldy=-(leftpos-bally+25)*0.13;
+		balldx=Math.sqrt(Math.abs(speed^2-balldy^2));
+		leftrand=(Math.random() * (50 - (-50))) - 50;
+		rightrand=(Math.random() * (50 - (-50))) - 50;
+	}	
+	
+	if(((bally<=20)&&(balldy<0))||((bally>=650)&&(balldy>0)))
+	{
+		balldy=balldy*-1;
+	}
+	
+	if(ballx>1260)
+	{
+	on=false;
+	pl++;
+	if(pl<5){document.getElementById('punktlinks').style.display='block';}
+	else{document.getElementById('gewonnenlinks').style.display='block';}
+	}
+	
+	if(ballx<-50)
+	{
+	on=false;
+	pr++;
+	if(pr<5){document.getElementById('punktrechts').style.display='block';}
+	else{document.getElementById('gewonnenrechts').style.display='block';}
+	}
+	
+}
+	
+}
+
+function render()
+{
+//Draw everything
+ctx.drawImage(document.getElementById("background"),0,0);
+ctx.drawImage(document.getElementById("ballimg"),ballx,bally);
+ctx.drawImage(document.getElementById("leftpaddle"), 30,leftpos);
+ctx.drawImage(document.getElementById("leftpaddle"), 1230,rightpos);
+ctx.font = "30px Comic Sans MS";
+ctx.fillStyle = "white";
+ctx.textAlign = "center";
+ctx.fillText(pl, 40, 50);
+ctx.fillText(pr, 1240, 50);
+requestAnimationFrame(render);
+}
+
+function weiter()
+{
+ballx=615;
+bally=335;
+balldy=0;
+balldx=5;
+leftpos=310;
+rightpos=310;
+on=true;
+down=false;
+up=false;
+leftup=false;
+rightup=false;
+document.getElementById('punktlinks').style.display='none';
+document.getElementById('punktrechts').style.display='none';
+}
+
+function checkcollission(x1,y1,b1,h1,x2,y2,b2,h2)
+	{
+		if((x2>x1)&&(x2<(x1+b1))&&(y2>y1)&&(y2<(y1+h1)))
+		{
+			return true;
+		}
+		else if(((x2+b2)>x1)&&((x2+b2)<(x1+b1))&&(y2>y1)&&(y2<(y1+h1)))
+		{
+			return true;
+		}
+		else if((x2>x1)&&(x2<(x1+b1))&&((y2+h2)>y1)&&((y2+h2)<(y1+h1)))
+		{
+			return true;
+		}
+		else if(((x2+b2)>x1)&&((x2+b2)<(x1+b1))&&((y2+h2)>y1)&&((y2+h2)<(y1+h1)))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	/*function checkcollission(x1,y1,b1,h1,x2,y2,b2,h2)
+	{
+	var rect1 = {x: x1, y: y1, width: b1, height: h1}
+	var rect2 = {x: x2, y: y2, width: b2, height: h2}
+
+if (rect1.x < rect2.x + rect2.width &&
+   rect1.x + rect1.width > rect2.x &&
+   rect1.y < rect2.y + rect2.height &&
+   rect1.height + rect1.y > rect2.y) {
+    return true;
+}
+else{
+return false;}
+	}*/
+	
+
+document.addEventListener('keydown', function(event) {
+if(on==true)
+{
+	//event.defaultPrevented = true;
+	switch(event.keyCode) {
+		
+		case 38:
+		case 75:
+			up = true;
+			event.cancelBubble = true;
+   event.returnValue = false;
+			break;
+		
+		case 40:
+		case 77:
+			down = true;
+			event.cancelBubble = true;
+   event.returnValue = false;
+			break;
+		case 87:
+			leftup=true;
+			event.cancelBubble = true;
+   event.returnValue = false;
+			break;
+		case 83:
+			leftdown=true;
+			event.cancelBubble = true;
+   event.returnValue = false;
+			break;
+		
+			
+	}
+	//event.cancelBubble = true;
+    //event.returnValue = false;
+	
+}}, true);
+
+document.addEventListener('keyup', function(event) {
+	if(on==true)
+	{
+	switch(event.keyCode) {
+		case 38:
+		case 75:
+			up = false;
+			event.cancelBubble = true;
+   event.returnValue = false;
+			break;
+		
+		case 40:
+		case 77:
+			down = false;
+			event.cancelBubble = true;
+   event.returnValue = false;
+			break;	
+		case 87:
+			leftup=false;
+			event.cancelBubble = true;
+   event.returnValue = false;
+			break;
+		case 83:
+			leftdown=false;
+			event.cancelBubble = true;
+   event.returnValue = false;
+			break;
+	}
+
+	
+}}, true);
+</script>
+</div>
+
+ 
+ <?php
+//Kopf mit Menue einbinden
+include 'bottom.php';
+?>
+<script>
+document.getElementById("gamesl").className+=" w3-cyan w3-hover-cyan";
+document.getElementById("gamess").className+=" w3-cyan w3-hover-cyan";
+</script>
+ </body>
+ </html>
