@@ -2,11 +2,11 @@
 <html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <head>
-<title>MGF-Pong</title>
+<title>JSPong</title>
 <link rel="icon" href="images/mgf-favicon.png">
+<!--Import W3css and the Google Material Icons to have some nice Graphics-->
 <link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
+
 <style>
 html,body,h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
 .w3-sidenav a,.w3-sidenav h4 {padding: 12px;}
@@ -14,105 +14,110 @@ html,body,h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif}
     padding-top: 12px;
     padding-bottom: 12px;
 }
-
 </style>
 </head>
 
+<!--Create the Body and a div, where everything is drawn to-->
 <body class="w3-white">
-
-<?php
-//Kopf mit Menue einbinden
-include 'head.php';
-?>
-
 <div class="w3-center w3-white" style="width: 95%;  margin: 0 auto;">
 <h1>Pong</h1>
-<canvas class="w3-center" id="myCanvas" width="1280" height="720" style="heigth:100%"></canvas>
+<!--This canvas will be used to draw the Pong Field-->
+<canvas class="w3-center" id="PongCanvas" width="1280" height="720" style="heigth:100%"></canvas>
 
+<!--Create the settings tab, where the players can select if they want to play against each one another or against the PC-->
 <div class="w3-modal" id="setup">
 <div class="w3-card-8 w3-modal-content w3-white">
 <div class="w3-container w3-cyan">
-<h3 class="w3-cyan w3-white-text">Einstellungen:</h3>
+<h3 class="w3-cyan w3-white-text">Settings:</h3>
 </div>
 <div class="w3-container w3-white">
 <div class="w3-container w3-half w3-white">
-<h4>Linker Spieler</h4><p>Tasten:<br /> W und S</p>
-<label>von Computer gesteuert </label><input id="kil" class="w3-check" type="checkbox" checked="checked" /><br /><br /> 
-<label>Name:</label><input id="namel" value="Spieler 1" class="w3-input w3-border w3-padding-4" type="text"><br />
+<h4>Left Player</h4><p>Keys:<br /> W and S</p>
+<label>controlled by computer </label><input id="kil" class="w3-check" type="checkbox" checked="checked" /><br /><br /> 
+<label>Name:</label><input id="namel" value="Player 1" class="w3-input w3-border w3-padding-4" type="text"><br />
 </div>
 <div class="w3-container w3-half w3-white">
-<h4>Rechter Spieler </h4><p>Tasten:<br />Pfeiltasten nach oben und unten</p>
-<label>von Computer gesteuert </label><input id="kir" class="w3-check" type="checkbox"><br /><br />
-<label>Name:</label><input id="namer" value="Spieler 2" class="w3-input w3-border w3-padding-4" type="text" /><br />
+<h4>Right Player </h4><p>Keys:<br />Arrow Up and Arrow Down</p>
+<label>controlled by computer </label><input id="kir" class="w3-check" type="checkbox"><br /><br />
+<label>Name:</label><input id="namer" value="Player 2" class="w3-input w3-border w3-padding-4" type="text" /><br />
 </div>
 </div>
-<button onClick="start()" class="w3-btn-block w3-cyan">Spiel starten!</button>
+<button onClick="start()" class="w3-btn-block w3-cyan">Start Game!</button>
 </div>
 </div>
 
-<div class="w3-modal" id="punktlinks">
+<!--Create the dialog, that is displayed, if the left player scored-->
+<div class="w3-modal" id="pointleft">
 <div class="w3-card-8 w3-modal-content">
-<h3 id="pflt" class="w3-center">Punkt fuer</h3>
-<button onClick="weiter()" class="w3-btn-block w3-cyan">Weiter</button>
+<h3 id="pflt" class="w3-center">Point for</h3>
+<button onClick="continue_game()" class="w3-btn-block w3-cyan">Continue Game</button>
 </div>
 </div>
 
-<div class="w3-modal" id="gewonnenlinks">
+<!--Create the dialog, that will be displayed, when the game is over and the left player wins-->
+<div class="w3-modal" id="winleft">
 <div class="w3-card-8 w3-modal-content">
-<h3 id="grl" class="w3-center">hat das Spiel gewonnen</h3>
-<button onClick="neu()" class="w3-btn-block w3-cyan">Neues Spiel</button>
-<button href="games.php" class="w3-btn-block w3-cyan">Zurück</button>
+<h3 id="grl" class="w3-center">won the game!</h3>
+<button onClick="new_game()" class="w3-btn-block w3-cyan">New Game</button>
 </div>
 </div>
 
-<div class="w3-modal" id="punktrechts">
+<!--Create the dialog, that is displayed, if the right player scored-->
+<div class="w3-modal" id="pointright">
 <div class="w3-card-8 w3-modal-content">
 <h3 id="pfrt" class="w3-center">Punkt fuer</h3>
-<button onClick="weiter()" class="w3-btn-block w3-cyan">Weiter</button>
+<button onClick="continue_game()" class="w3-btn-block w3-cyan">Continue Game</button>
 </div>
 </div>
 
-<div class="w3-modal" id="gewonnenrechts">
+<!--Create the dialog, that will be displayed, when the game is over and the right player wins-->
+<div class="w3-modal" id="winright">
 <div class="w3-card-8 w3-modal-content">
-<h3 id="grt" class="w3-center">hat das Spiel gewonnen!</h3>
-<button onClick="neu()" class="w3-btn-block w3-cyan">Neues Spiel</button>
-<button class="w3-btn-block w3-cyan">Zurück</button>
+<h3 id="grt" class="w3-center">won the game!</h3>
+<button onClick="new_game()" class="w3-btn-block w3-cyan">New Game</button>
 </div>
 </div>
 
+<!--Load in the images, that will be used, to draw the pong field, ball and players-->
 <div style="display: none;">
-<img src="images/background.jpg" id="background"  />
-<img src="images/ball.png" id="ballimg"  />
-<img src="images/leftpaddle.png" id="leftpaddle" />
+<img src="background.jpg" id="background"  />
+<img src="ball.png" id="ballimg"  />
+<img src="leftpaddle.png" id="leftpaddle" />
 </div>
 
-
+<!--The actual Javascript code, that makes the game happen!-->
 <script>
-var leftrand=0;
-var rightrand=0;
-var pl=0;
-var pr=0;
-var on=false;
-var leftpos = 310;
-var rightpos =310;
-var speed = 500;
-var angle = 0;
-var balldx=5;
-var balldy=0;
-var ballx=615;
-var bally=335;
-var up=false;
-var down=false;
-var leftup=false;
-var leftdown=false;
-var rightplayer=false;
-var leftplayer=true; 
-var canvas = document.getElementById("myCanvas");
+var leftrand=0; //Random offset, that the computer player uses to bounce the ball on a random position on the paddle
+var rightrand=0; //Random offset, that the computer player uses to bounce the ball on a random position on the paddle
+var pl=0; //Points of the left player
+var pr=0; //Points of the right player
+var on=false; //Is the game running? true == running, false ==paused
+var leftpos = 310; //vertical position of left paddle
+var rightpos =310; //vertical position of right paddle
+var speed = 500; //speed of the ball
+var balldx=5; //Distance, the ball moves in x (horizontal) axis during one frame (30ms)
+var balldy=0; //Distance, the ball moves in y (vertical) axis during one frame (30ms)
+var ballx=615; //Ball Position x (horizontal)
+var bally=335; //Ball Position y (vertical)
+var up=false; //Is the key pressed, so that the right paddle moves up?
+var down=false; //Is the key pressed, so that the right paddle moves down?
+var leftup=false; //Is the key pressed, so that the left paddle moves up?
+var leftdown=false; //Is the key pressed, so that the left paddle moves down?
+var rightplayer=false; //Is the right player controlled by software? Standard = human player
+var leftplayer=true;  //Is the right player controlled by software? Standard = software player
+
+//Get the canvas, the Pong game is drawn to
+var canvas = document.getElementById("PongCanvas");
 var ctx = canvas.getContext("2d");
 render();
+
+//Set an intervall of 33ms (= 30FSP) to update the fame
 setInterval(loop, 33);
+
+//Display the setup dialog, so that the player can set the game up
 document.getElementById('setup').style.display='block'
 
+//This function starts the game
 function start()
 {
 	pl=0;
@@ -121,7 +126,6 @@ function start()
 	leftpos=310;
 	rightpos=310;
 	speed=500;
-	angle=0;
 	ballx=615;
 	bally=335;
 	balldx=5;
@@ -129,265 +133,283 @@ function start()
 	rightplayer = document.getElementById("kir").checked;
 	leftplayer = document.getElementById("kil").checked;
 	document.getElementById('setup').style.display='none';
-	document.getElementById('grt').innerHTML=document.getElementById("namer").value+" hat das Spiel gewonnen!";
-	document.getElementById('grl').innerHTML=document.getElementById("namel").value+" hat das Spiel gewonnen!";
-	document.getElementById('pflt').innerHTML="Punkt für "+document.getElementById("namel").value;
-	document.getElementById('pfrt').innerHTML="Punkt für "+document.getElementById("namer").value;
+	document.getElementById('grt').innerHTML=document.getElementById("namer").value+" won the game!";
+	document.getElementById('grl').innerHTML=document.getElementById("namel").value+" won the game!";
+	document.getElementById('pflt').innerHTML="Point for "+document.getElementById("namel").value;
+	document.getElementById('pfrt').innerHTML="Point for "+document.getElementById("namer").value;
 	
 }
 
-function neu()
+//This function displays the new game dialog
+function new_game()
 {
 document.getElementById('setup').style.display='block';
-document.getElementById('gewonnenlinks').style.display='none';
-document.getElementById('gewonnenrechts').style.display='none';
+document.getElementById('winleft').style.display='none';
+document.getElementById('winright').style.display='none';
 }
 
+//The loop function for the game
 function loop()
 {
-	if(on==true){
-	if(rightplayer==false)
+	//Check, if the game is on (= has started) only then, the game actions will be executed
+	if(on==true)
 	{
-		if(up==true)
-		{rightpos-=5;}
-		else if(down==true)
-		{rightpos+=5;}
+		//If the right player is played by the gamer, then evaluate, if the keyboard key is pressed and move the paddle accordingly
+		if(rightplayer==false)
+		{
+			if(up==true)
+			{
+				rightpos-=5;
+			}
+			else if(down==true)
+			{
+				rightpos+=5;
+			}
+		}
+		else //If it is controlled by the computer, then move it according to the ball position
+		{
+			if(bally<(rightpos+25+rightrand))
+			{
+				rightpos-=5
+			}
+			if(bally>(rightpos+25+rightrand))
+			{
+				rightpos+=5
+			}
+		}
+		//Limit the paddle position, so that it cannot go out of the game aerea
+		if(rightpos<20)
+		{
+			rightpos=20;
+		}
+		else if(rightpos>600)
+		{
+			rightpos=600;
+		}
+		
+		//If the right player is played by the gamer, then evaluate, if the keyboard key is pressed and move the paddle accordingly
+		if(leftplayer==false)
+		{
+			if(leftup==true)
+			{
+				leftpos-=5;
+			}
+			else if(leftdown==true)
+			{
+				leftpos+=5;
+			}
+		}
+		else //If it is controlled by the computer, then move it according to the ball position
+		{
+			if(bally<(leftpos+25+leftrand))
+			{
+				leftpos-=5
+			}
+			if(bally>(leftpos+25+leftrand))
+			{
+				leftpos+=5
+			}
+		}
+		//Limit the paddle position, so that it cannot go out of the game aerea
+		if(leftpos<20)
+		{
+			leftpos=20;
+		}
+		else if(leftpos>600)
+		{
+			leftpos=600;
+		}
+		// Move ball
+		ballx+=balldx;
+		bally+=balldy;
+		
+		// Check collision with right paddle
+		if(checkcollission(1230,rightpos,20,100,ballx,bally,50,50)==true)
+		{
+			//balldx and balldy are the distances the ball moves in one frame (30ms)
+			balldy=-(rightpos-bally+25)*0.13; //Set the y direction speed, according to where the ball hit on the paddle
+			balldx=-Math.sqrt(Math.abs(speed^2-balldy^2)); //Set the x-direction according to the vector speed of the ball and the y direction speed
+			//Leftrand and Rightrand are the values, the left paddle and right paddle is offset, if controlled by the computer. This results in the ball leaving the paddle at different angles, as the computer tries to center the ball to the paddle and offsets if from the center by this ammount
+			leftrand=(Math.random() * (50 - (-50))) - 50;
+			rightrand=(Math.random() * (50 - (-50))) - 50;
+		}
+		// Check collision with left paddle
+		if(checkcollission(30,leftpos,20,100,ballx,bally,50,50)==true)
+		{
+			//balldx and balldy are the distances the ball moves in one frame (30ms)
+			balldy=-(leftpos-bally+25)*0.13; //Set the y direction speed, according to where the ball hit on the paddle
+			balldx=Math.sqrt(Math.abs(speed^2-balldy^2)); //Set the x-direction according to the vector speed of the ball and the y direction speed
+			//Leftrand and Rightrand are the values, the left paddle and right paddle is offset, if controlled by the computer. This results in the ball leaving the paddle at different angles, as the computer tries to center the ball to the paddle and offsets if from the center by this ammount
+			leftrand=(Math.random() * (50 - (-50))) - 50;
+			rightrand=(Math.random() * (50 - (-50))) - 50;
+		}	
+		
+		//Cehck, if the ball touched one of the upper or lower field boundarys. In case it did, bounce it back, by inverting the y-dy
+		if(((bally<=20)&&(balldy<0))||((bally>=650)&&(balldy>0)))
+		{
+			balldy=balldy*-1;
+		}
+		
+		//If the ball went out of the field to the right, the left player scored a point! So display the corresponding dialog 
+		if(ballx>1260)
+		{
+			on=false;
+			pl++;
+			//If the left player has 5 points, they win!
+			if(pl<5)
+			{
+				document.getElementById('pointleft').style.display='block';
+			}
+			else{document.getElementById('winleft').style.display='block';
+		}
 	}
-	else
-	{
-		if(bally<(rightpos+25+rightrand))
-		{rightpos-=5}
-		if(bally>(rightpos+25+rightrand))
-		{rightpos+=5}
+		
+		//If the ball went out of the field to the left, the right player scored a point! So display the corresponding dialog 
+		if(ballx<-50)
+		{
+			on=false;
+			pr++;
+			//If the right player has 5 points, they win!
+			if(pr<5)
+			{
+				document.getElementById('pointright').style.display='block';
+			}
+		else{document.getElementById('winright').style.display='block';
 	}
-	if(rightpos<20)
-	{
-		rightpos=20;
-	}
-	else if(rightpos>600)
-	{
-		rightpos=600;
-	}
-	
-	if(leftplayer==false)
-	{
-		if(leftup==true)
-		{leftpos-=5;}
-		else if(leftdown==true)
-		{leftpos+=5;}
-	}
-	else
-	{
-		if(bally<(leftpos+25+leftrand))
-		{leftpos-=5}
-		if(bally>(leftpos+25+leftrand))
-		{leftpos+=5}
-	}
-	if(leftpos<20)
-	{
-		leftpos=20;
-	}
-	else if(leftpos>600)
-	{
-		leftpos=600;
-	}
-	// Move ball
-	ballx+=balldx;
-	bally+=balldy;
-	
-	// Check collision with right paddle
-	if(checkcollission(1230,rightpos,20,100,ballx,bally,50,50)==true)
-	{
-		balldy=-(rightpos-bally+25)*0.13;
-		balldx=-Math.sqrt(Math.abs(speed^2-balldy^2));
-		leftrand=(Math.random() * (50 - (-50))) - 50;
-		rightrand=(Math.random() * (50 - (-50))) - 50;
-	}
-	// Check collision with left paddle
-	if(checkcollission(30,leftpos,20,100,ballx,bally,50,50)==true)
-	{
-		balldy=-(leftpos-bally+25)*0.13;
-		balldx=Math.sqrt(Math.abs(speed^2-balldy^2));
-		leftrand=(Math.random() * (50 - (-50))) - 50;
-		rightrand=(Math.random() * (50 - (-50))) - 50;
-	}	
-	
-	if(((bally<=20)&&(balldy<0))||((bally>=650)&&(balldy>0)))
-	{
-		balldy=balldy*-1;
-	}
-	
-	if(ballx>1260)
-	{
-	on=false;
-	pl++;
-	if(pl<5){document.getElementById('punktlinks').style.display='block';}
-	else{document.getElementById('gewonnenlinks').style.display='block';}
-	}
-	
-	if(ballx<-50)
-	{
-	on=false;
-	pr++;
-	if(pr<5){document.getElementById('punktrechts').style.display='block';}
-	else{document.getElementById('gewonnenrechts').style.display='block';}
-	}
+		}
 	
 }
 	
 }
 
+//This fucntion renders the canvas
 function render()
 {
 //Draw everything
-ctx.drawImage(document.getElementById("background"),0,0);
-ctx.drawImage(document.getElementById("ballimg"),ballx,bally);
-ctx.drawImage(document.getElementById("leftpaddle"), 30,leftpos);
-ctx.drawImage(document.getElementById("leftpaddle"), 1230,rightpos);
-ctx.font = "30px Comic Sans MS";
-ctx.fillStyle = "white";
-ctx.textAlign = "center";
-ctx.fillText(pl, 40, 50);
-ctx.fillText(pr, 1240, 50);
-requestAnimationFrame(render);
+	ctx.drawImage(document.getElementById("background"),0,0);
+	ctx.drawImage(document.getElementById("ballimg"),ballx,bally);
+	ctx.drawImage(document.getElementById("leftpaddle"), 30,leftpos);
+	ctx.drawImage(document.getElementById("leftpaddle"), 1230,rightpos);
+	ctx.font = "30px Comic Sans MS";
+	ctx.fillStyle = "white";
+	ctx.textAlign = "center";
+	ctx.fillText(pl, 40, 50);
+	ctx.fillText(pr, 1240, 50);
+	requestAnimationFrame(render);
 }
 
-function weiter()
+//This function is used to continue the game, after it was paused
+function continue_game()
 {
-ballx=615;
-bally=335;
-balldy=0;
-balldx=5;
-leftpos=310;
-rightpos=310;
-on=true;
-down=false;
-up=false;
-leftup=false;
-rightup=false;
-document.getElementById('punktlinks').style.display='none';
-document.getElementById('punktrechts').style.display='none';
+	ballx=615;
+	bally=335;
+	balldy=0;
+	balldx=5;
+	leftpos=310;
+	rightpos=310;
+	on=true;
+	down=false;
+	up=false;
+	leftup=false;
+	rightup=false;
+	document.getElementById('pointleft').style.display='none';
+	document.getElementById('pointright').style.display='none';
 }
 
+//This function checks, if two sprites are overlapping. And returns true, if they do. This is used, to chec for colissions between the ball and the paddles
 function checkcollission(x1,y1,b1,h1,x2,y2,b2,h2)
-	{
-		if((x2>x1)&&(x2<(x1+b1))&&(y2>y1)&&(y2<(y1+h1)))
-		{
-			return true;
-		}
-		else if(((x2+b2)>x1)&&((x2+b2)<(x1+b1))&&(y2>y1)&&(y2<(y1+h1)))
-		{
-			return true;
-		}
-		else if((x2>x1)&&(x2<(x1+b1))&&((y2+h2)>y1)&&((y2+h2)<(y1+h1)))
-		{
-			return true;
-		}
-		else if(((x2+b2)>x1)&&((x2+b2)<(x1+b1))&&((y2+h2)>y1)&&((y2+h2)<(y1+h1)))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
-	/*function checkcollission(x1,y1,b1,h1,x2,y2,b2,h2)
-	{
-	var rect1 = {x: x1, y: y1, width: b1, height: h1}
-	var rect2 = {x: x2, y: y2, width: b2, height: h2}
-
-if (rect1.x < rect2.x + rect2.width &&
-   rect1.x + rect1.width > rect2.x &&
-   rect1.y < rect2.y + rect2.height &&
-   rect1.height + rect1.y > rect2.y) {
-    return true;
-}
-else{
-return false;}
-	}*/
-	
-
-document.addEventListener('keydown', function(event) {
-if(on==true)
 {
-	//event.defaultPrevented = true;
-	switch(event.keyCode) {
-		
-		case 38:
-		case 75:
-			up = true;
-			event.cancelBubble = true;
-   event.returnValue = false;
-			break;
-		
-		case 40:
-		case 77:
-			down = true;
-			event.cancelBubble = true;
-   event.returnValue = false;
-			break;
-		case 87:
-			leftup=true;
-			event.cancelBubble = true;
-   event.returnValue = false;
-			break;
-		case 83:
-			leftdown=true;
-			event.cancelBubble = true;
-   event.returnValue = false;
-			break;
-		
-			
+	if((x2>x1)&&(x2<(x1+b1))&&(y2>y1)&&(y2<(y1+h1)))
+	{
+		return true;
 	}
-	//event.cancelBubble = true;
-    //event.returnValue = false;
+	else if(((x2+b2)>x1)&&((x2+b2)<(x1+b1))&&(y2>y1)&&(y2<(y1+h1)))
+	{
+		return true;
+	}
+	else if((x2>x1)&&(x2<(x1+b1))&&((y2+h2)>y1)&&((y2+h2)<(y1+h1)))
+	{
+		return true;
+	}
+	else if(((x2+b2)>x1)&&((x2+b2)<(x1+b1))&&((y2+h2)>y1)&&((y2+h2)<(y1+h1)))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 	
-}}, true);
-
-document.addEventListener('keyup', function(event) {
+	
+//Add an event listener to the document. This is called, any time a keyboard key is released
+document.addEventListener('keydown', function(event) {
 	if(on==true)
 	{
-	switch(event.keyCode) {
-		case 38:
-		case 75:
-			up = false;
-			event.cancelBubble = true;
-   event.returnValue = false;
-			break;
-		
-		case 40:
-		case 77:
-			down = false;
-			event.cancelBubble = true;
-   event.returnValue = false;
-			break;	
-		case 87:
-			leftup=false;
-			event.cancelBubble = true;
-   event.returnValue = false;
-			break;
-		case 83:
-			leftdown=false;
-			event.cancelBubble = true;
-   event.returnValue = false;
-			break;
+		//event.defaultPrevented = true;
+		switch(event.keyCode) {
+			
+			case 38:
+			case 75:
+				up = true;
+				event.cancelBubble = true;
+				event.returnValue = false;
+				break;
+			
+			case 40:
+			case 77:
+				down = true;
+				event.cancelBubble = true;
+				event.returnValue = false;
+				break;
+			case 87:
+				leftup=true;
+				event.cancelBubble = true;
+				event.returnValue = false;
+				break;
+			case 83:
+				leftdown=true;
+				event.cancelBubble = true;
+				event.returnValue = false;
+				break;				
+		}		
 	}
+}, true);
 
-	
-}}, true);
+	//Add an event listener to the document. This is called, any time a keyboard key is pressed
+	document.addEventListener('keyup', function(event) 
+	{
+		if(on==true)
+		{
+		switch(event.keyCode) {
+			case 38:
+			case 75:
+				up = false;
+				event.cancelBubble = true;
+				event.returnValue = false;
+				break;
+			
+			case 40:
+			case 77:
+				down = false;
+				event.cancelBubble = true;
+				event.returnValue = false;
+				break;	
+			case 87:
+				leftup=false;
+				event.cancelBubble = true;
+				event.returnValue = false;
+				break;
+			case 83:
+				leftdown=false;
+				event.cancelBubble = true;
+				event.returnValue = false;
+				break;
+		}		
+	}
+}, true);
 </script>
 </div>
 
- 
- <?php
-//Kopf mit Menue einbinden
-include 'bottom.php';
-?>
-<script>
-document.getElementById("gamesl").className+=" w3-cyan w3-hover-cyan";
-document.getElementById("gamess").className+=" w3-cyan w3-hover-cyan";
-</script>
  </body>
  </html>
